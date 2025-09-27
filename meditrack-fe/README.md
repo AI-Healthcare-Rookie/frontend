@@ -56,7 +56,7 @@ MediTrack은 환자들이 복용 중인 약물과 병원 방문 내역을 손쉽
 ---
 
 ## 📂 폴더 구조 (Frontend)
-
+```bash
 src/
 ├─ app/ # queryClient, router 등 앱 초기 세팅
 ├─ components/
@@ -69,7 +69,7 @@ src/
 ├─ services/ # API 통신 (axios)
 ├─ styles/ # GlobalStyle, theme
 └─ utils/ # 날짜 등 유틸
-
+```
 ---
 
 ## ⚙️ 실행 방법
