@@ -1,5 +1,22 @@
-import axios from 'axios';
+// src/services/apiClient.js
+import axios from "axios";
+
+const BASE = import.meta.env.VITE_API_BASE || "https://04569935294d.ngrok-free.app/";
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true, // 서버 httpOnly 쿠키 사용
+  baseURL: BASE,                // ← 8080으로 직접 보냄
+  withCredentials: false,
+  timeout: 15000,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
 });
+
+api.interceptors.response.use(
+  (r) => r,
+  (e) => {
+    console.error("[API ERROR]", e?.config?.method?.toUpperCase(), e?.config?.url, e?.response?.status, e?.message);
+    return Promise.reject(e);
+  }
+);
