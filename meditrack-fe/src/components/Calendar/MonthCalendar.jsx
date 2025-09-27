@@ -1,28 +1,37 @@
 import { useState } from "react";
+import styled from "styled-components";
 import Calendar from "react-calendar";
 import 'react-calendar/dist/Calendar.css';
 import dayjs from "dayjs";
 
-export default function MonthCalendar({ _month, visitsMap, onPickDate }) {
-  // month: '2025-06'
-  const [value, setValue] = useState(new Date());
+const Wrap = styled.div`
+  .react-calendar { border: 0; width: 100%; font-family: inherit; }
+  .react-calendar__tile { height: 44px; border-radius: 10px; }
+  .react-calendar__tile--now { background: #f5f7fb; }
+  .react-calendar__tile--active { background: #4A90E2; color: #fff; }
+`;
+const Dot = styled.div`
+  width: 6px; height: 6px; border-radius: 999px;
+  margin: 4px auto 0; background: #6FCF97;
+`;
 
-  // 날짜 타일에 방문여부 표시
+export default function MonthCalendar({ visitsMap, onPickDate }) {
+  const [value, setValue] = useState(new Date());
   const tileContent = ({ date, view }) => {
     if (view !== 'month') return null;
     const key = dayjs(date).format("YYYY-MM-DD");
-    const has = !!visitsMap[key];
-    return has ? <div className="mt-1 h-1 w-1 rounded-full bg-emerald-500 mx-auto"/> : null;
+    return visitsMap[key] ? <Dot/> : null;
   };
-
   return (
-    <Calendar
-      onClickDay={(date)=> onPickDate(dayjs(date).format("YYYY-MM-DD"))}
-      value={value}
-      onChange={setValue}
-      tileContent={tileContent}
-      locale="ko-KR"
-      calendarType="gregory"
-    />
+    <Wrap>
+      <Calendar
+        onClickDay={(date) => onPickDate(dayjs(date).format("YYYY-MM-DD"))}
+        value={value}
+        onChange={setValue}
+        tileContent={tileContent}
+        locale="ko-KR"
+        calendarType="gregory"
+      />
+    </Wrap>
   );
 }
