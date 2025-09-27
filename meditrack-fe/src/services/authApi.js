@@ -1,7 +1,7 @@
 // src/services/authApi.js
 import { api } from "./apiClient";
 
-const raw = import.meta.env.VITE_API_AUTH_PREFIX || "https://04569935294d.ngrok-free.app/api/auth";
+const raw = import.meta.env.VITE_API_AUTH_PREFIX || "https://723d2b841829.ngrok-free.app/";
 const AUTH_PREFIX = "/" + String(raw).replace(/^\/+|\/+$/g, ""); // '/api/auth'
 const join = (base, path) => `${base}/${String(path).replace(/^\/+/, "")}`;
 

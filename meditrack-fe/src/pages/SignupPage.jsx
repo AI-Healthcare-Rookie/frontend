@@ -13,8 +13,13 @@ const Header = styled.div`
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
-  img { height: 24px; }
-  span { font-weight: 700; font-size: 18px; }
+  img {
+    height: 24px;
+  }
+  span {
+    font-weight: 700;
+    font-size: 18px;
+  }
 `;
 const Title = styled.h1`
   text-align: center;
@@ -36,27 +41,60 @@ const Step = styled.div`
   font-size: 13px;
 `;
 const StepIcon = styled.div`
-  width: 48px; height: 48px; border-radius: 999px;
-  background: #5ABDDE; display: grid; place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: #5abdde;
+  display: grid;
+  place-items: center;
   margin: 0 auto 6px;
-  img { width: 24px; filter: invert(1); }
+  img {
+    width: 24px;
+  }
 `;
 
 const Card = styled.div`
-  max-width: 600px; margin: 0 auto; background: #fff;
-  border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px;
 `;
-const SectionTitle = styled.h3` font-weight: 700; margin: 0 0 12px; `;
-const Label = styled.label` display: block; font-size: 14px; margin: 14px 0 8px; `;
+const SectionTitle = styled.h3`
+  font-weight: 700;
+  margin: 0 0 12px;
+`;
+const Label = styled.label`
+  display: block;
+  font-size: 14px;
+  margin: 14px 0 8px;
+`;
 const Input = styled.input`
-  width: 100%; border: 1px solid #ddd; border-radius: 8px;
-  padding: 12px; background: #fafafa; font-size: 14px;
+  width: 95%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafafa;
+  font-size: 14px;
 `;
-const Error = styled.p` color: #ff2222; font-size: 12px; margin-top: 6px; `;
+const Error = styled.p`
+  color: #ff2222;
+  font-size: 12px;
+  margin-top: 6px;
+`;
 const Submit = styled.button`
-  width: 100%; margin-top: 18px; background: #5ABDDE; color: #fff;
-  font-weight: 700; border: 0; border-radius: 8px; padding: 14px;
-  &:disabled { opacity: .6; }
+  width: 100%;
+  margin-top: 18px;
+  background: #5abdde;
+  color: #fff;
+  font-weight: 700;
+  border: 0;
+  border-radius: 8px;
+  padding: 14px;
+  &:disabled {
+    opacity: 0.6;
+  }
 `;
 
 export default function SignupPage() {
@@ -73,17 +111,20 @@ export default function SignupPage() {
     e.preventDefault();
     setErr("");
 
-    if (!name || !email || !pw || !pw2) return setErr("필수 항목을 입력해주세요.");
-    if (pw.length < 6 || pw.length > 20) return setErr("비밀번호는 6~20자 입니다.");
+    if (!name || !email || !pw || !pw2)
+      return setErr("필수 항목을 입력해주세요.");
+    if (pw.length < 6 || pw.length > 20)
+      return setErr("비밀번호는 6~20자 입니다.");
     if (pw !== pw2) return setErr("비밀번호가 일치하지 않습니다.");
 
     try {
       setSubmitting(true);
       const payload = {
-        name: name.trim(),
+        username: name.trim(),
         email: email.trim(),
         password: pw,
       };
+      console.log(payload);
       await signup(payload); // JSON만 전송
       nav("/signup/done?name=" + encodeURIComponent(name), { replace: true });
     } catch (e) {
@@ -110,11 +151,15 @@ export default function SignupPage() {
 
       <Steps>
         <Step>
-          <StepIcon><img src="../../public/person.png" alt="본인인증" /></StepIcon>
+          <StepIcon>
+            <img src="../../public/person.png" alt="본인인증" />
+          </StepIcon>
           본인인증
         </Step>
         <Step>
-          <StepIcon><img src="../../public/pencil.png" alt="정보입력" /></StepIcon>
+          <StepIcon>
+            <img src="../../public/pencil.png" alt="정보입력" />
+          </StepIcon>
           정보입력
         </Step>
         <Step>

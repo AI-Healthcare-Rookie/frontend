@@ -2,74 +2,74 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-export default function DayDetailModal({ open, onClose, date, initial, onSubmit }) {
-  const [hospitalName, setHospitalName] = useState("");
-  const [prescriptionDate, setPrescriptionDate] = useState(date || "");
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+const ENDPOINT = `${API_BASE}/medicine/fetch`;
+
+export default function DayDetailModal({ open, onClose, onSubmit }) {
   const [file, setFile] = useState(null);
   const dialogRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
-    setHospitalName(initial?.hospitalName || "");
-    setPrescriptionDate(initial?.prescriptionDate || date || "");
     setFile(null);
-  }, [open, initial, date]);
+  }, [open]);
 
   if (!open) return null;
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const fd = new FormData();
-    fd.append("date", date || prescriptionDate); // 기본 키로 날짜도 함께 전송
-    fd.append("hospitalName", hospitalName);
-    fd.append("prescriptionDate", prescriptionDate);
-    if (file) fd.append("attachment", file); // 백엔드 필드명: attachment
 
-    onSubmit(fd); // 메인페이지의 handleSave(formData) 호출
+    if (!file) {
+      alert("첨부파일을 선택해주세요.");
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("attachment", file);
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`Upload failed: ${res.status} ${text}`);
+      }
+
+      const data = await res.json().catch(() => ({}));
+      onSubmit?.(data);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("업로드 중 오류가 발생했습니다.");
+    }
   };
 
   return (
     <Backdrop onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()} ref={dialogRef}>
         <Header>
-          <h3>복약 정보 입력</h3>
+          <h3>처방전 첨부</h3>
           <button onClick={onClose}>✕</button>
         </Header>
 
         <form onSubmit={handleSave}>
           <Field>
-            <label>병원명</label>
-            <input
-              type="text"
-              placeholder="예) 연암이비인후과"
-              value={hospitalName}
-              onChange={(e) => setHospitalName(e.target.value)}
-              required
-            />
-          </Field>
-
-          <Field>
-            <label>복용일자</label>
-            <input
-              type="date"
-              value={prescriptionDate || ""}
-              onChange={(e) => setPrescriptionDate(e.target.value)}
-              required
-            />
-          </Field>
-
-          <Field>
-            <label>처방전 첨부</label>
+            <label>처방전 파일</label>
             <input
               type="file"
               accept=".png,.jpg,.jpeg,.pdf"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              required
             />
           </Field>
 
           <Actions>
             <button type="button" onClick={onClose}>취소</button>
-            <button type="submit">저장</button>
+            <button type="submit">업로드</button>
           </Actions>
         </form>
       </ModalCard>
@@ -84,7 +84,7 @@ const Backdrop = styled.div`
   z-index: 1000;
 `;
 const ModalCard = styled.div`
-  width: min(520px, 92vw);
+  width: min(420px, 92vw);
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -100,7 +100,7 @@ const Header = styled.div`
 const Field = styled.div`
   display: grid; gap: 6px; margin: 12px 0;
   label { font-size: 13px; color: #4b5563; }
-  input[type="text"], input[type="date"], input[type="file"] {
+  input[type="file"] {
     border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px;
     font-size: 14px;
   }

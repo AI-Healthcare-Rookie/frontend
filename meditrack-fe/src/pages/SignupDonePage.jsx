@@ -38,7 +38,6 @@ const Icon = styled.div`
   margin: 0 auto 6px;
   img {
     width: 26px;
-    filter: invert(1);
   }
 `;
 const Welcome = styled.h2`
@@ -103,7 +102,7 @@ export default function SignupDonePage() {
           <b>MediTrack</b>과 함께해요!
         </Desc>
 
-        <Img src="/images/fireworks.png" alt="축하" />
+        <Img src="../../public/fireworks.png" alt="축하" />
         <Btn onClick={() => nav("/login", { replace: true })}>로그인하기</Btn>
       </Box>
     </Page>
