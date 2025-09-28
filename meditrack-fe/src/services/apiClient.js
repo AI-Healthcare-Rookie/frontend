@@ -1,12 +1,11 @@
 // src/services/apiClient.js
 import axios from "axios";
 
-const BASE = import.meta.env.VITE_API_BASE || "https://723d2b841829.ngrok-free.app/";
-
+const BASE = import.meta.env.VITE_API_BASE || "https://1a791fd28620.ngrok-free.app/";
+console.log("[API] baseURL:", BASE);
 export const api = axios.create({
   baseURL: BASE,                // ← 8080으로 직접 보냄
-  withCredentials: false,
-  timeout: 15000,
+  withCredentials: true,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

@@ -2,16 +2,17 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
-const ENDPOINT = `${API_BASE}/medicine/fetch`;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const ENDPOINT = `${API_BASE}/api/medicines/fetch`;
 
 export default function DayDetailModal({ open, onClose, onSubmit }) {
+  // 파일은 선택할 수 있지만 전송에는 사용하지 않음
   const [file, setFile] = useState(null);
   const dialogRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
-    setFile(null);
+    setFile(null); // 선택 상태만 초기화
   }, [open]);
 
   if (!open) return null;
@@ -19,24 +20,26 @@ export default function DayDetailModal({ open, onClose, onSubmit }) {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    if (!file) {
-      alert("첨부파일을 선택해주세요.");
-      return;
-    }
-
-    const fd = new FormData();
-    fd.append("attachment", file);
+    // JSON만 보낼 것이므로 파일 검증 제거
+    const payload = {
+      apiUrl: "http://localhost:8000/ocr",
+      // 필요한 값 더 있으면 아래에 추가하면 됨
+      // e.g. date, userId 등
+    };
 
     try {
       const res = await fetch(ENDPOINT, {
         method: "POST",
-        body: fd,
+        headers: {
+          "Content-Type": "application/json",
+        },
         credentials: "include",
+        body: JSON.stringify(payload),
       });
-
+      console.log(res);
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(`Upload failed: ${res.status} ${text}`);
+        throw new Error(`Request failed: ${res.status} ${text}`);
       }
 
       const data = await res.json().catch(() => ({}));
@@ -44,7 +47,7 @@ export default function DayDetailModal({ open, onClose, onSubmit }) {
       onClose();
     } catch (err) {
       console.error(err);
-      alert("업로드 중 오류가 발생했습니다.");
+      alert("요청 중 오류가 발생했습니다.");
     }
   };
 
@@ -58,13 +61,17 @@ export default function DayDetailModal({ open, onClose, onSubmit }) {
 
         <form onSubmit={handleSave}>
           <Field>
-            <label>처방전 파일</label>
+            <label>처방전 파일 (선택)</label>
             <input
               type="file"
               accept=".png,.jpg,.jpeg,.pdf"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              required
+              // required 제거 — JSON만 전송
             />
+            {/* 안내 문구 */}
+            <small style={{ color: "#6b7280" }}>
+              현재는 파일을 업로드하지 않고 JSON 데이터만 서버로 전송합니다.
+            </small>
           </Field>
 
           <Actions>

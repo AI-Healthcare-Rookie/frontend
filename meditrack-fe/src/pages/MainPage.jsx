@@ -1,21 +1,13 @@
 // src/pages/MainPage.jsx
 import styled from "styled-components";
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useAuth } from "../contexts/AuthContext";
 
 import SectionCard from "../components/common/SectionCard";
 import MonthCalendar from "../components/Calendar/MonthCalendar";
 import DayDetailModal from "../components/Calendar/DayDetailModal";
-import WeeklyVisitList from "../components/WeeklyVisits/WeeklyVisitList";
 import ReportPanel from "../components/Report/ReportPanel";
-
-import {
-  getMonthlyVisits,
-  getVisitByDate,
-  createOrUpdateVisit,
-} from "../services/visitsApi";
 
 // ───────────────── UI ─────────────────
 const HeaderBar = styled.header`
@@ -39,17 +31,11 @@ const H1 = styled.h1`
 `;
 
 // ──────────────── Helper: 항상 배열 보장 ────────────────
+// (visitsApi를 제거했지만, 혹시 다른 곳에서 객체 형태를 넘길 때를 대비해 남겨둠)
 function normalizeVisits(raw) {
-  // 기대 스키마: [{ date:'YYYY-MM-DD', hospitalName:'...' }, ...]
   if (Array.isArray(raw)) return raw;
-
   if (!raw) return [];
-
   if (typeof raw === "object") {
-    // 객체 스키마를 배열로 변환
-    // 예: { '2025-06-03': '이비인후과' }
-    //   또는 { '2025-06-03': { hospitalName: '이비인후과' } }
-    //   또는 { '2025-06-03': ['A병원','B병원'] }
     const arr = [];
     for (const [date, value] of Object.entries(raw)) {
       if (Array.isArray(value)) {
@@ -58,8 +44,7 @@ function normalizeVisits(raw) {
           else if (v && typeof v === "object")
             arr.push({
               date,
-              hospitalName:
-                v.hospitalName || v.hospital || String(v),
+              hospitalName: v.hospitalName || v.hospital || String(v),
             });
         });
       } else if (typeof value === "string") {
@@ -67,60 +52,39 @@ function normalizeVisits(raw) {
       } else if (value && typeof value === "object") {
         arr.push({
           date,
-          hospitalName:
-            value.hospitalName || value.hospital || String(value),
+          hospitalName: value.hospitalName || value.hospital || String(value),
         });
       }
     }
     return arr;
   }
-
-  // 그 외 타입 방어
   return [];
 }
 
 // ───────────────── Page ─────────────────
 export default function MainPage() {
   const { user, logout } = useAuth();
-  const qc = useQueryClient();
 
   const [month, setMonth] = useState(dayjs().format("YYYY-MM"));
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // 월별 방문 내역
-  const { data: rawVisits, isLoading } = useQuery({
-    queryKey: ["visits", month],
-    queryFn: () => getMonthlyVisits(month),
-  });
-
-  // 항상 배열 보장
-  const visits = useMemo(() => normalizeVisits(rawVisits), [rawVisits]);
-
-  // 캘린더 점 표시용 map
+  // visitsApi 제거: 더미(빈 배열)로 동작
+  const visits = useMemo(() => normalizeVisits([]), []);
   const visitsMap = useMemo(() => {
-    return Object.fromEntries(
-      (visits || []).map((v) => [v.date, v])
-    );
+    return Object.fromEntries((visits || []).map((v) => [v.date, v]));
   }, [visits]);
 
-  // 날짜 클릭 → 상세 모달 오픈
-  const openDayModal = async (date) => {
+  // 날짜 클릭 → 상세 모달 오픈 (API 호출 제거)
+  const openDayModal = (date) => {
     setSelectedDate(date);
-    const initial = await getVisitByDate(date).catch(() => null);
-    setSelectedVisit(initial);
+    setSelectedVisit(null); // 초기값 없음
     setModalOpen(true);
   };
 
-  // 저장
-  const save = useMutation({
-    mutationFn: createOrUpdateVisit,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["visits", month] }),
-  });
-
-  const handleSave = async (payload) => {
-    await save.mutateAsync(payload);
+  // 저장 (API 호출 제거 → 모달만 닫기)
+  const handleSave = async (_payload) => {
     setModalOpen(false);
   };
 
@@ -177,20 +141,16 @@ export default function MainPage() {
               </select>
             </div>
 
-            {/* MonthCalendar는 month prop을 받을 수도 있으니 함께 전달 */}
             <MonthCalendar
               month={month}
               visitsMap={visitsMap}
               onPickDate={openDayModal}
             />
           </SectionCard>
-
-          {/* 주간 리스트: 컴포넌트가 month를 받는 버전이면 함께 전달 */}
-          <WeeklyVisitList month={month} visits={visits} />
         </div>
 
-        {/* 약 복용 분석 리포트 영역 */}
-        <ReportPanel loading={isLoading} />
+        {/* API 제거로 loading은 false 고정 */}
+        <ReportPanel loading={false} />
       </Grid>
 
       <DayDetailModal
